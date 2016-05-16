@@ -41,6 +41,9 @@ class MasterViewController: UITableViewController {
         searchController.dimsBackgroundDuringPresentation = false
         definesPresentationContext = true
         tableView.tableHeaderView = searchController.searchBar
+        
+        searchController.searchBar.scopeButtonTitles = ["All", "Chocolate", "Hard", "Other"]
+        searchController.searchBar.delegate = self
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -105,17 +108,28 @@ class MasterViewController: UITableViewController {
     // MARK: Helper Functions
     func filterContentForSearchText(searchText: String, scope: String = "All") {
         filteredCandies = candies.filter { candy in
-            return candy.name.lowercaseString.containsString(searchText.lowercaseString)
+            
+            let categoryMatch = (scope == "All") || (candy.category == scope)
+            
+            return categoryMatch && candy.name.lowercaseString.containsString(searchText.lowercaseString)
         }
         
         tableView.reloadData()
     }
 }
 
-// MARK: Class Extensions
+// MARK: Class Extensions for search delegates
 
 extension MasterViewController: UISearchResultsUpdating {
     func updateSearchResultsForSearchController(searchController: UISearchController) {
-        filterContentForSearchText(searchController.searchBar.text!)
+        let searchBar = searchController.searchBar
+        let scope = searchBar.scopeButtonTitles![searchBar.selectedScopeButtonIndex]
+        filterContentForSearchText(searchController.searchBar.text!, scope: scope)
+    }
+}
+
+extension MasterViewController: UISearchBarDelegate {
+    func searchBar(searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
+        filterContentForSearchText(searchBar.text!, scope: searchBar.scopeButtonTitles![selectedScope])
     }
 }
