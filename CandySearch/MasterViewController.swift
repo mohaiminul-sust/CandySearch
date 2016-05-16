@@ -86,7 +86,14 @@ class MasterViewController: UITableViewController {
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "showDetail" {
             if let indexPath = tableView.indexPathForSelectedRow {
-                let candy = candies[indexPath.row]
+                let candy: Candy
+                
+                if searchController.active && searchController.searchBar.text != "" {
+                    candy = filteredCandies[indexPath.row]
+                } else {
+                    candy = candies[indexPath.row]
+                }
+                
                 let controller = (segue.destinationViewController as! UINavigationController).topViewController as! DetailViewController
                 controller.detailCandy = candy
                 controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem()
